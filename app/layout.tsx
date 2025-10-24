@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,6 +18,10 @@ export const metadata: Metadata = {
   title: "스포츠 커뮤니티 - 배팅 사이트 순위 & 랭킹",
   description: "국내외 배팅 사이트들의 순위와 랭킹을 확인하고, 스포츠 커뮤니티에서 다양한 정보를 공유하세요.",
   keywords: ["스포츠", "배팅", "순위", "랭킹", "커뮤니티", "토토"],
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -28,7 +34,25 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <AuthProvider>
+          {children}
+          <Toaster 
+            position="top-center"
+            reverseOrder={false}
+            gutter={8}
+            toastOptions={{
+              // 모바일 최적화
+              className: '',
+              style: {
+                borderRadius: '12px',
+                padding: '16px 24px',
+                fontSize: '14px',
+                fontWeight: '500',
+                maxWidth: '90vw',
+              },
+            }}
+          />
+        </AuthProvider>
       </body>
     </html>
   );

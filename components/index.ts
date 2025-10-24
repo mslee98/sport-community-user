@@ -9,4 +9,5 @@ export { default as SearchBar } from "./SearchBar";
 export { default as RankingCard } from "./RankingCard";
 export { default as EventBanner } from "./EventBanner";
 export { default as UpdateNote } from "./UpdateNote";
+export { default as UserDropdown } from "./UserDropdown";
 

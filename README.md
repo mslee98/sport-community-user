@@ -48,7 +48,16 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 > **참고**: `.env.example` 파일을 참고하여 작성할 수 있습니다.
 
-### 4. Supabase 데이터베이스 타입 생성 (선택사항)
+### 4. 데이터베이스 스키마 설정
+
+`DATABASE_SCHEMA.md` 파일을 참고하여 Supabase SQL Editor에서 스키마를 생성합니다:
+
+1. Supabase Dashboard → SQL Editor
+2. `DATABASE_SCHEMA.md`의 SQL 실행
+3. UserInfo 테이블 및 RLS 정책 생성
+4. 초기 관리자 계정 설정
+
+### 5. Supabase 데이터베이스 타입 생성 (선택사항)
 
 Supabase CLI를 사용하여 타입을 자동 생성할 수 있습니다:
 
@@ -84,14 +93,23 @@ npm run lint
 ```
 sport-commu-usr/
 ├── app/                    # Next.js App Router 디렉토리
-│   ├── layout.tsx         # 루트 레이아웃
-│   ├── page.tsx           # 홈 페이지
-│   └── globals.css        # 글로벌 스타일
+│   ├── auth/              # 인증 관련 페이지
+│   │   ├── login/        # 로그인 페이지
+│   │   ├── signup/       # 회원가입 페이지
+│   │   └── forgot-password/ # 비밀번호 재설정
+│   ├── rankings/         # 순위 페이지
+│   ├── community/        # 커뮤니티 페이지
+│   ├── layout.tsx        # 루트 레이아웃
+│   ├── page.tsx          # 홈 페이지
+│   └── globals.css       # 글로벌 스타일
 ├── components/            # 재사용 가능한 컴포넌트
-│   ├── Header.tsx
-│   ├── Footer.tsx
-│   ├── Button.tsx
-│   └── Card.tsx
+│   ├── Header.tsx        # 헤더 (YouTube 스타일)
+│   ├── Footer.tsx        # 푸터
+│   ├── EventBanner.tsx   # 이벤트 배너 캐러셀
+│   ├── UpdateNote.tsx    # 주간 업데이트 노트
+│   ├── RankingCard.tsx   # 순위 카드
+│   ├── Button.tsx        # 버튼 컴포넌트
+│   └── Badge.tsx         # 배지 컴포넌트
 ├── lib/                   # 유틸리티 및 설정
 │   ├── supabase/         # Supabase 클라이언트 설정
 │   │   ├── client.ts     # 브라우저 클라이언트
@@ -101,18 +119,34 @@ sport-commu-usr/
 ├── types/                # TypeScript 타입 정의
 │   ├── database.types.ts # Supabase 데이터베이스 타입
 │   └── index.ts          # 공통 타입
-├── middleware.ts         # Next.js 미들웨어
+├── middleware.ts         # Next.js 미들웨어 (세션 관리)
+├── DATABASE_SCHEMA.md    # 데이터베이스 스키마 가이드
 └── .env.local           # 환경 변수 (git에 추가하지 않음)
 ```
 
 ## 🎨 주요 기능
 
+### UI/UX
 - ✅ 반응형 디자인 (모바일, 태블릿, 데스크톱)
 - ✅ 다크 모드 지원
-- ✅ Supabase 인증 통합
+- ✅ YouTube 스타일 헤더 및 네비게이션
+- ✅ 이벤트 배너 캐러셀 (5개 슬라이드)
+- ✅ 주간 업데이트 노트
+- ✅ 프로모션별 순위 카드 (6개 카테고리)
+
+### 인증 시스템
+- ✅ ID 기반 로그인 (이메일 로그인과 연동)
+- ✅ 회원가입 (관리자 승인 방식)
+- ✅ 비밀번호 재설정
+- ✅ 소셜 로그인 지원 예정 (Google, GitHub)
+- ✅ 레벨/경험치/포인트 시스템
+- ✅ 권한 관리 (user, admin, super_admin)
+
+### 기술
 - ✅ 타입 안전성 (TypeScript)
 - ✅ 재사용 가능한 컴포넌트
 - ✅ SEO 최적화
+- ✅ Supabase RLS (Row Level Security)
 
 ## 🔐 환경 변수 없이 실행하기
 
@@ -121,12 +155,53 @@ Supabase 설정이 완료되지 않은 경우에도 프로젝트를 실행할 �
 
 단, Supabase 기능(인증, 데이터베이스 등)을 사용하려면 환경 변수 설정이 필수입니다.
 
+## 🔐 인증 시스템
+
+### 회원가입 플로우
+
+1. `/auth/signup` 페이지에서 회원정보 입력
+   - ID (로그인용, 4자 이상, 영문/숫자/언더스코어)
+   - 이메일
+   - 비밀번호 (8자 이상)
+   - 이름
+   - 닉네임 (2자 이상)
+
+2. Supabase Auth에 이메일/비밀번호로 계정 생성
+
+3. UserInfo 테이블에 추가 정보 저장
+   - `approval_yn = false` (관리자 승인 대기)
+   - 기본 레벨 1, 포인트 0으로 시작
+
+4. 관리자 승인 후 로그인 가능
+
+### 로그인 플로우
+
+1. `/auth/login` 페이지에서 ID와 비밀번호 입력
+
+2. ID로 UserInfo 테이블에서 이메일 조회
+
+3. `approval_yn` 체크 (승인되지 않은 경우 차단)
+
+4. Supabase Auth로 이메일/비밀번호 인증
+
+5. 세션 생성 및 홈으로 리다이렉트
+
+### 관리자 기능
+
+- 회원 승인/거부
+- 권한 변경 (user ↔ admin)
+- 레벨/경험치/포인트 조정
+
+자세한 내용은 `DATABASE_SCHEMA.md`를 참고하세요.
+
 ## 📚 참고 자료
 
 - [Next.js 문서](https://nextjs.org/docs)
 - [Supabase 문서](https://supabase.com/docs)
 - [Tailwind CSS 문서](https://tailwindcss.com/docs)
 - [TypeScript 문서](https://www.typescriptlang.org/docs/)
+- [Supabase Auth 가이드](https://supabase.com/docs/guides/auth)
+- [Row Level Security](https://supabase.com/docs/guides/auth/row-level-security)
 
 ## 🚀 배포하기
 

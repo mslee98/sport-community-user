@@ -3,11 +3,14 @@
 import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import UserDropdown from "./UserDropdown";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const pathname = usePathname();
+  const { user, loading } = useAuth();
 
   const handleToggleMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -21,10 +24,10 @@ const Header = () => {
   };
 
   const navItems = [
-    { href: "/", label: "개인", icon: "🏠" },
-    { href: "/rankings", label: "e스포츠", icon: "🎮" },
-    { href: "/rankings?category=스포츠", label: "스포츠", icon: "⚽" },
-    { href: "/rankings?category=엔터", label: "엔터+", icon: "🎵" },
+    { href: "/", label: "홈" },
+    { href: "/rankings", label: "순위" },
+    { href: "/community", label: "커뮤니티" },
+    { href: "/rankings?category=스포츠", label: "스포츠" },
   ];
 
   return (
@@ -52,30 +55,26 @@ const Header = () => {
             </svg>
           </button>
 
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded bg-black dark:bg-white">
-              <span className="text-lg font-bold text-white dark:text-black">S</span>
-            </div>
-            <span className="hidden text-xl font-bold text-slate-900 dark:text-white sm:block">
-              슈퍼랭킹
-            </span>
+          <Link href="/" className="flex items-center">
+            <img 
+              src="/logo.png" 
+              alt="로고" 
+              className="h-10 w-auto object-contain md:h-12"
+            />
           </Link>
         </div>
 
-        {/* Center: Navigation (Desktop only) */}
-        <nav className="hidden flex-1 justify-center md:flex">
-          <div className="flex items-center space-x-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center space-x-2 rounded-lg px-4 py-2 font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-              >
-                <span className="text-lg">{item.icon}</span>
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </div>
+        {/* Left Navigation (Desktop only) */}
+        <nav className="hidden md:flex md:items-center md:space-x-1">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
         {/* Center: Search Bar (Desktop) */}
@@ -110,8 +109,9 @@ const Header = () => {
           </form>
         </div>
 
-        {/* Right: Dark Mode + Login */}
+        {/* Right: Login/User */}
         <div className="flex items-center space-x-2">
+          {/* Dark Mode - 주석 처리
           <button
             className="flex items-center justify-center rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800"
             aria-label="다크모드 전환"
@@ -130,13 +130,20 @@ const Header = () => {
               />
             </svg>
           </button>
+          */}
 
-          <Link
-            href="/login"
-            className="rounded-full border-2 border-slate-300 px-4 py-1.5 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-50 dark:border-slate-600 dark:text-blue-400 dark:hover:bg-slate-800"
-          >
-            로그인
-          </Link>
+          {!loading && (
+            user ? (
+              <UserDropdown />
+            ) : (
+              <Link
+                href="/auth/login"
+                className="rounded-full border-2 border-slate-300 px-4 py-1.5 text-sm font-semibold text-orange-600 transition-colors hover:bg-orange-50 dark:border-slate-600 dark:text-orange-400 dark:hover:bg-slate-800"
+              >
+                로그인
+              </Link>
+            )
+          )}
         </div>
 
         {/* Mobile Search Button */}
@@ -195,66 +202,50 @@ const Header = () => {
               </div>
             </form>
 
-            {/* Mobile Nav Items */}
-            <div className="space-y-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center space-x-3 rounded-lg px-4 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-                  onClick={handleToggleMenu}
-                >
-                  <span className="text-xl">{item.icon}</span>
-                  <span>{item.label}</span>
-                </Link>
-              ))}
+                {/* Mobile Nav Items */}
+                <div className="space-y-1">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="block rounded-lg px-4 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                      onClick={handleToggleMenu}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
 
-              <div className="my-2 border-t border-slate-200 dark:border-slate-800" />
+                  <div className="my-2 border-t border-slate-200 dark:border-slate-800" />
 
-              <Link
-                href="/rankings?category=스포츠 배팅"
-                className="flex items-center space-x-3 rounded-lg px-4 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-                onClick={handleToggleMenu}
-              >
-                <span className="text-xl">⚽</span>
-                <span>스포츠 배팅</span>
-              </Link>
-              <Link
-                href="/rankings?category=토토"
-                className="flex items-center space-x-3 rounded-lg px-4 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-                onClick={handleToggleMenu}
-              >
-                <span className="text-xl">🎯</span>
-                <span>토토</span>
-              </Link>
-              <Link
-                href="/rankings?category=카지노"
-                className="flex items-center space-x-3 rounded-lg px-4 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-                onClick={handleToggleMenu}
-              >
-                <span className="text-xl">🎰</span>
-                <span>카지노</span>
-              </Link>
-              <Link
-                href="/rankings?category=e-스포츠"
-                className="flex items-center space-x-3 rounded-lg px-4 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-                onClick={handleToggleMenu}
-              >
-                <span className="text-xl">🎮</span>
-                <span>e-스포츠</span>
-              </Link>
-
-              <div className="my-2 border-t border-slate-200 dark:border-slate-800" />
-
-              <Link
-                href="/community"
-                className="flex items-center space-x-3 rounded-lg px-4 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-                onClick={handleToggleMenu}
-              >
-                <span className="text-xl">💬</span>
-                <span>커뮤니티</span>
-              </Link>
-            </div>
+                  <Link
+                    href="/rankings?category=스포츠 배팅"
+                    className="block rounded-lg px-4 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                    onClick={handleToggleMenu}
+                  >
+                    스포츠 배팅
+                  </Link>
+                  <Link
+                    href="/rankings?category=토토"
+                    className="block rounded-lg px-4 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                    onClick={handleToggleMenu}
+                  >
+                    토토
+                  </Link>
+                  <Link
+                    href="/rankings?category=카지노"
+                    className="block rounded-lg px-4 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                    onClick={handleToggleMenu}
+                  >
+                    카지노
+                  </Link>
+                  <Link
+                    href="/rankings?category=e-스포츠"
+                    className="block rounded-lg px-4 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                    onClick={handleToggleMenu}
+                  >
+                    e-스포츠
+                  </Link>
+                </div>
           </div>
         </div>
       )}

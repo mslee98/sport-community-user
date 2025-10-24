@@ -6,13 +6,12 @@ const Footer = () => {
       <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid gap-8 md:grid-cols-4">
           <div>
-            <div className="mb-4 flex items-center space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
-                <span className="text-lg font-bold text-white">S</span>
-              </div>
-              <span className="text-lg font-bold text-slate-900 dark:text-white">
-                스포츠 커뮤니티
-              </span>
+            <div className="mb-4 flex items-center">
+              <img 
+                src="/logo.png" 
+                alt="스포츠 커뮤니티 로고" 
+                className="h-10 w-auto object-contain"
+              />
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400">
               국내외 배팅 사이트 순위와 랭킹 정보를 제공하는 커뮤니티 플랫폼
