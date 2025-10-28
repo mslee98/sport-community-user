@@ -8,6 +8,8 @@
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
 - **Database & Auth**: [Supabase](https://supabase.com/)
+- **UI Components**: Custom components with Tailwind CSS
+- **Notifications**: [react-hot-toast](https://react-hot-toast.com/)
 - **Deployment**: Vercel (권장)
 
 ## 📋 사전 요구사항
@@ -136,8 +138,14 @@ sport-commu-usr/
 
 ### 인증 시스템
 - ✅ ID 기반 로그인 (이메일 로그인과 연동)
+- ✅ **로그인 유지 기능** (localStorage/sessionStorage)
+  - 체크 시: 브라우저 닫아도 세션 유지
+  - 미체크 시: 브라우저 닫으면 자동 로그아웃
+- ✅ ID/닉네임 중복 체크 (회원가입 시)
 - ✅ 회원가입 (관리자 승인 방식)
 - ✅ 비밀번호 재설정
+- ✅ Toast 알림 시스템 (성공/에러/경고/정보)
+- ✅ 사용자 프로필 드롭다운 (My Profile, Settings, Sign Out)
 - ✅ 소셜 로그인 지원 예정 (Google, GitHub)
 - ✅ 레벨/경험치/포인트 시스템
 - ✅ 권한 관리 (user, admin, super_admin)
@@ -178,13 +186,21 @@ Supabase 설정이 완료되지 않은 경우에도 프로젝트를 실행할 �
 
 1. `/auth/login` 페이지에서 ID와 비밀번호 입력
 
-2. ID로 UserInfo 테이블에서 이메일 조회
+2. "로그인 상태 유지" 체크박스 선택 (기본: 체크됨)
+   - **체크 시**: `localStorage` 사용 → 브라우저 닫아도 유지
+   - **미체크 시**: `sessionStorage` 사용 → 브라우저 닫으면 자동 로그아웃
 
-3. `approval_yn` 체크 (승인되지 않은 경우 차단)
+3. ID로 UserInfo 테이블에서 이메일 조회
 
-4. Supabase Auth로 이메일/비밀번호 인증
+4. `approval_yn` 체크 (승인되지 않은 경우 차단)
 
-5. 세션 생성 및 홈으로 리다이렉트
+5. Supabase Auth로 이메일/비밀번호 인증
+
+6. 선택한 storage 타입으로 세션 저장
+
+7. 홈으로 리다이렉트
+
+> **로그인 유지 기능 상세 설명**: `REMEMBER_ME_IMPLEMENTATION.md` 참고
 
 ### 관리자 기능
 
@@ -194,7 +210,13 @@ Supabase 설정이 완료되지 않은 경우에도 프로젝트를 실행할 �
 
 자세한 내용은 `DATABASE_SCHEMA.md`를 참고하세요.
 
-## 📚 참고 자료
+## 📚 프로젝트 문서
+
+- **`DATABASE_SCHEMA.md`**: 데이터베이스 스키마 및 테이블 구조
+- **`SUPABASE_SETUP.md`**: Supabase 프로젝트 설정 가이드
+- **`REMEMBER_ME_IMPLEMENTATION.md`**: 로그인 유지 기능 구현 상세 설명
+
+## 📚 외부 참고 자료
 
 - [Next.js 문서](https://nextjs.org/docs)
 - [Supabase 문서](https://supabase.com/docs)
@@ -202,6 +224,7 @@ Supabase 설정이 완료되지 않은 경우에도 프로젝트를 실행할 �
 - [TypeScript 문서](https://www.typescriptlang.org/docs/)
 - [Supabase Auth 가이드](https://supabase.com/docs/guides/auth)
 - [Row Level Security](https://supabase.com/docs/guides/auth/row-level-security)
+- [react-hot-toast 문서](https://react-hot-toast.com/)
 
 ## 🚀 배포하기
 
