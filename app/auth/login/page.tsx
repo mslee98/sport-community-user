@@ -8,7 +8,6 @@ import { showSuccessToast, showErrorToast, showWarningToast } from "@/lib/toast"
 
 const LoginPage = () => {
   const router = useRouter();
-  const supabase = createClient();
 
   const [formData, setFormData] = useState({
     id: "",
@@ -17,7 +16,7 @@ const LoginPage = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true); // 기본값을 true로 설정
   
   // Supabase 설정 체크
   const isSupabaseConfigured = 
@@ -63,6 +62,10 @@ const LoginPage = () => {
     setIsLoading(true);
 
     try {
+      // rememberMe 값에 따라 적절한 storage를 사용하는 클라이언트 생성
+      // rememberMe가 false면 sessionStorage 사용 (브라우저 닫으면 세션 삭제)
+      const supabase = createClient(!rememberMe);
+
       // 1. ID로 UserInfo에서 이메일 조회
       const { data: userInfo, error: userError } = await supabase
         .from("UserInfo")
