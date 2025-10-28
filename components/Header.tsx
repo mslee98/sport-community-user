@@ -35,9 +35,10 @@ const Header = () => {
       <div className="flex items-center justify-between px-4 py-3">
         {/* Left: Menu + Logo */}
         <div className="flex items-center space-x-4">
+          {/* Hamburger Menu - 모바일 전용 */}
           <button
             onClick={handleToggleMenu}
-            className="flex items-center justify-center rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="flex items-center justify-center rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800 md:hidden"
             aria-label="메뉴"
           >
             <svg
