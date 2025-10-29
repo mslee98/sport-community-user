@@ -1,56 +1,117 @@
 import Link from "next/link";
 import { Header, Footer, RankingCard, EventBanner, UpdateNote } from "@/components";
+import { createClient } from "@/lib/supabase/server";
 
-// Mock ranking data
-const firstDepositRanking = [
-  { id: "1", rank: 1, name: "프리미어벳", value: "+200%", tier: 1, change: "up" as const, changeAmount: 1 },
-  { id: "2", rank: 2, name: "베팅킹", value: "+150%", tier: 1, change: "same" as const },
-  { id: "3", rank: 3, name: "슈어벳", value: "+150%", tier: 2, change: "down" as const, changeAmount: 1 },
-  { id: "4", rank: 4, name: "토토마스터", value: "+100%", tier: 2, change: "up" as const, changeAmount: 2 },
-  { id: "5", rank: 5, name: "스포츠존", value: "+100%", tier: 3, change: "same" as const },
-];
+// 카테고리별 랭킹 데이터 타입 (DB 함수 반환 타입)
+interface CategoryRanking {
+  category: string;
+  site_seq: string;
+  site_name: string;
+  url: string;
+  type: string;
+  logo_image?: string | null;
+  logo_url?: string | null;
+  value: number;
+  rank: number;
+  subscriber_count: number;
+  avg_rating: number;
+}
 
-const dailyFirstDepositRanking = [
-  { id: "1", rank: 1, name: "베팅킹", value: "+50%", tier: 1, change: "up" as const, changeAmount: 2 },
-  { id: "2", rank: 2, name: "프리미어벳", value: "+30%", tier: 1, change: "down" as const, changeAmount: 1 },
-  { id: "3", rank: 3, name: "카지노플러스", value: "+30%", tier: 2, change: "same" as const },
-  { id: "4", rank: 4, name: "슈어벳", value: "+20%", tier: 2, change: "up" as const, changeAmount: 1 },
-  { id: "5", rank: 5, name: "e스포츠뱅크", value: "+20%", tier: 3, change: "same" as const },
-];
+// RankingCard에 전달할 데이터 타입
+interface RankingItem {
+  id: string;
+  rank: number;
+  name: string;
+  logo_url?: string;
+  value: string;
+  tier: number;
+  change: "up" | "down" | "same";
+  changeAmount?: number;
+}
 
-const everyDepositRanking = [
-  { id: "1", rank: 1, name: "프리미어벳", value: "최대 5만원", tier: 1, change: "same" as const },
-  { id: "2", rank: 2, name: "슈어벳", value: "최대 3만원", tier: 2, change: "up" as const, changeAmount: 1 },
-  { id: "3", rank: 3, name: "베팅킹", value: "최대 3만원", tier: 1, change: "down" as const, changeAmount: 1 },
-  { id: "4", rank: 4, name: "토토마스터", value: "최대 2만원", tier: 2, change: "same" as const },
-  { id: "5", rank: 5, name: "스포츠존", value: "최대 2만원", tier: 3, change: "same" as const },
-];
+// 카테고리 영문명을 한글명으로 매핑
+const CATEGORY_NAME_MAP: Record<string, string> = {
+  'first_bonus': '가입 첫 충',
+  'daily_first_bonus': '매일 첫 충',
+  'repeat_bonus': '매일 매 충',
+  'casino_payback': '카지노 페이백',
+  'slot_payback': '슬롯 페이백',
+  'rolling': '롤링',
+};
 
-const rollingRanking = [
-  { id: "1", rank: 1, name: "베팅킹", value: "0.8%", tier: 1, change: "same" as const },
-  { id: "2", rank: 2, name: "프리미어벳", value: "0.7%", tier: 1, change: "same" as const },
-  { id: "3", rank: 3, name: "카지노플러스", value: "0.6%", tier: 2, change: "up" as const, changeAmount: 1 },
-  { id: "4", rank: 4, name: "슈어벳", value: "0.5%", tier: 2, change: "down" as const, changeAmount: 1 },
-  { id: "5", rank: 5, name: "토토마스터", value: "0.5%", tier: 3, change: "same" as const },
-];
+// 평점을 기반으로 tier 계산 (1-5)
+const calculateTier = (avgRating: number): number => {
+  if (avgRating >= 4.5) return 1;
+  if (avgRating >= 4.0) return 2;
+  if (avgRating >= 3.5) return 3;
+  if (avgRating >= 3.0) return 4;
+  return 5;
+};
 
-const eventRanking = [
-  { id: "1", rank: 1, name: "프리미어벳", value: "15개", tier: 1, change: "up" as const, changeAmount: 2 },
-  { id: "2", rank: 2, name: "베팅킹", value: "12개", tier: 1, change: "same" as const },
-  { id: "3", rank: 3, name: "슈어벳", value: "10개", tier: 2, change: "same" as const },
-  { id: "4", rank: 4, name: "카지노플러스", value: "8개", tier: 2, change: "up" as const, changeAmount: 1 },
-  { id: "5", rank: 5, name: "e스포츠뱅크", value: "7개", tier: 3, change: "down" as const, changeAmount: 1 },
-];
+// 값을 포맷팅 (카테고리별로 다르게 표시)
+const formatValue = (category: string, value: number): string => {
+  if (category === 'rolling') {
+    return `${value}%`;
+  }
+  if (category === 'casino_payback' || category === 'slot_payback') {
+    return `${value}%`;
+  }
+  // bonus 카테고리들
+  return `+${value}%`;
+};
 
-const tierRanking = [
-  { id: "1", rank: 1, name: "프리미어벳", value: "98점", tier: 1, change: "same" as const },
-  { id: "2", rank: 2, name: "베팅킹", value: "96점", tier: 1, change: "same" as const },
-  { id: "3", rank: 3, name: "슈어벳", value: "93점", tier: 2, change: "up" as const, changeAmount: 1 },
-  { id: "4", rank: 4, name: "카지노플러스", value: "91점", tier: 2, change: "down" as const, changeAmount: 1 },
-  { id: "5", rank: 5, name: "토토마스터", value: "88점", tier: 2, change: "same" as const },
-];
+// 카테고리별 데이터 매핑 함수
+const mapCategoryData = (data: CategoryRanking[]): Record<string, RankingItem[]> => {
+  const grouped: Record<string, RankingItem[]> = {};
 
-export default function Home() {
+  data.forEach((item) => {
+    const categoryKorean = CATEGORY_NAME_MAP[item.category] || item.category;
+    
+    if (!grouped[categoryKorean]) {
+      grouped[categoryKorean] = [];
+    }
+
+    grouped[categoryKorean].push({
+      id: item.site_seq,
+      rank: item.rank,
+      name: item.site_name,
+      logo_url: item.logo_url || undefined,
+      value: formatValue(item.category, item.value),
+      tier: calculateTier(item.avg_rating),
+      change: "same" as const, // 기본값 (추후 순위 변동 로직 추가 가능)
+    });
+  });
+
+  return grouped;
+};
+
+export default async function Home() {
+  // 서버 사이드에서 데이터 가져오기
+  const supabase = await createClient();
+  
+  let categoryRankings: Record<string, RankingItem[]> = {};
+  
+  try {
+    const { data, error } = await supabase.rpc('get_all_category_rankings', { 
+      p_limit: 5 
+    });
+
+    if (error) {
+      console.error('Error fetching category rankings:', error);
+    } else if (data) {
+      categoryRankings = mapCategoryData(data);
+    }
+  } catch (error) {
+    console.error('Failed to fetch rankings:', error);
+  }
+
+  // 카테고리별 데이터 추출 (fallback 데이터 포함)
+  const firstDepositRanking = categoryRankings['가입 첫 충'] || [];
+  const dailyFirstDepositRanking = categoryRankings['매일 첫 충'] || [];
+  const everyDepositRanking = categoryRankings['매일 매 충'] || [];
+  const rollingRanking = categoryRankings['롤링'] || [];
+  const casinoPaybackRanking = categoryRankings['카지노 페이백'] || [];
+  const slotPaybackRanking = categoryRankings['슬롯 페이백'] || [];
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <Header />
@@ -118,21 +179,21 @@ export default function Home() {
           <RankingCard
             title="카지노 페이백"
             period="일간"
-            items={rollingRanking}
+            items={casinoPaybackRanking}
             bgImage="https://images.unsplash.com/photo-1620321023374-d1a68fbc720d?w=400&h=160&fit=crop"
             linkHref="/rankings?promo=casino-payback"
           />
           <RankingCard
             title="슬롯 페이백"
             period="일간"
-            items={eventRanking}
+            items={slotPaybackRanking}
             bgImage="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=160&fit=crop"
             linkHref="/rankings?promo=slot-payback"
           />
           <RankingCard
             title="롤링"
             period="일간"
-            items={tierRanking}
+            items={rollingRanking}
             bgImage="https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400&h=160&fit=crop"
             linkHref="/rankings?promo=rolling"
           />
@@ -151,7 +212,22 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <Link
+              href="/tier"
+              className="group flex items-center space-x-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 dark:border-slate-700 dark:bg-slate-900"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 text-2xl shadow-md">
+                🏆
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 group-hover:text-yellow-600 dark:text-white dark:group-hover:text-yellow-400">
+                  티어 랭킹
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">평점별 분류</p>
+              </div>
+            </Link>
+
             <Link
               href="/rankings?category=스포츠 배팅"
               className="group flex items-center space-x-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 dark:border-slate-700 dark:bg-slate-900"

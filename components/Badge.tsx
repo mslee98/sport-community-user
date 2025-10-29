@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { HTMLAttributes } from "react";
+import Image from "next/image";
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   variant?: "default" | "success" | "warning" | "danger" | "info" | "tier-1" | "tier-2" | "tier-3" | "tier-4" | "tier-5";
@@ -28,10 +29,35 @@ const Badge = ({ className, variant = "default", size = "md", children, ...props
     lg: "px-4 py-1.5 text-base",
   };
 
+  // 티어별 로고 경로
+  const getTierLogo = (variant: string) => {
+    const tierLogos = {
+      "tier-1": "/Images/tier/tier1.svg",
+      "tier-2": "/Images/tier/tier2.svg",
+      "tier-3": "/Images/tier/tier3.svg",
+      "tier-4": "/Images/tier/tier4.svg",
+      "tier-5": "/Images/tier/tier5.svg",
+    };
+    return tierLogos[variant as keyof typeof tierLogos];
+  };
+
+  // 티어 배지인지 확인
+  const isTierBadge = variant?.startsWith("tier-");
+
   return (
-    <span className={cn(baseStyles, variants[variant], sizes[size], className)} {...props}>
-      {children}
-    </span>
+    <>
+      {isTierBadge ? (
+        <Image
+          src={getTierLogo(variant!) || ""}
+          alt={`${variant} 로고`}
+          width={size === "sm" ? 16 : size === "md" ? 18 : 20}
+          height={size === "sm" ? 16 : size === "md" ? 18 : 20}
+          className="object-contain"
+        />
+        ) : (
+          children
+        )}
+      </>
   );
 };
 

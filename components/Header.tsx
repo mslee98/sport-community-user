@@ -26,6 +26,7 @@ const Header = () => {
   const navItems = [
     { href: "/", label: "홈" },
     { href: "/rankings", label: "순위" },
+    { href: "/tier", label: "티어" },
     { href: "/community", label: "커뮤니티" },
     { href: "/rankings?category=스포츠", label: "스포츠" },
   ];

@@ -132,34 +132,34 @@ const RankingCard = ({
                   {item.rank}
                 </span>
 
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-700">
+                <div className="relative flex h-10 w-10 shrink-0 items-center justify-center">
                   {item.logo_url ? (
                     <img
                       src={item.logo_url}
                       alt={item.name}
-                      className="h-6 w-6 rounded-lg object-contain"
+                      className="h-10 w-10 rounded-xl object-contain"
                     />
                   ) : (
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                      {item.name.charAt(0)}
-                    </span>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-700">
+                      <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
+                        {item.name.charAt(0)}
+                      </span>
+                    </div>
+                  )}
+                  {item.tier && (
+                    <div className="absolute -bottom-1 -right-1">
+                      <Badge
+                        variant={`tier-${item.tier}` as any}
+                        size="lg"
+                      />
+                    </div>
                   )}
                 </div>
 
                 <div>
-                  <div className="flex items-center space-x-1.5">
-                    <span className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
-                      {item.name}
-                    </span>
-                    {item.tier && (
-                      <Badge
-                        variant={`tier-${item.tier}` as any}
-                        size="sm"
-                      >
-                        {item.tier}티어
-                      </Badge>
-                    )}
-                  </div>
+                  <span className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
+                    {item.name}
+                  </span>
                 </div>
               </div>
 
