@@ -166,7 +166,7 @@ export default async function TierPage() {
                 <div className="mb-4 flex items-center space-x-3">
                   <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${group.tierColor} text-lg font-bold text-white shadow-md`}>
                     <Image
-                      src={`/images/tier/tier${group.tier}.svg`}
+                      src={`/Images/tier/tier${group.tier}.svg`}
                       alt={`${group.tierLabel} 로고`}
                       width={24}
                       height={24}

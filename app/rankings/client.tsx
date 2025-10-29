@@ -117,7 +117,7 @@ export default function RankingsClient({ sites: initialSites }: RankingsClientPr
         {/* Background Image */}
         <div className="absolute inset-0">
           <img 
-            src="/images/banners/rank-banner.jpeg" 
+            src="/Images/banners/rank-banner.jpeg" 
             alt="배너" 
             className="h-full w-full object-cover"
           />
