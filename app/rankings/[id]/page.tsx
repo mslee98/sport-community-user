@@ -7,7 +7,7 @@ const mockSite = {
   name: "프리미어벳",
   description: "국내 최고의 스포츠 배팅 사이트. 안전하고 빠른 입출금, 다양한 이벤트 제공",
   rating: 4.8,
-  tier: "S" as const,
+  tier: 1,
   category: "스포츠 배팅",
   logo_url: "",
   website_url: "https://example.com",
@@ -68,22 +68,13 @@ const mockReviews = [
 ];
 
 export default function SiteDetailPage() {
-  const getTierVariant = (tier: string) => {
-    switch (tier) {
-      case "S":
-        return "tier-s";
-      case "A":
-        return "tier-a";
-      case "B":
-        return "tier-b";
-      case "C":
-        return "tier-c";
-      case "D":
-        return "tier-d";
-      default:
-        return "default";
+  const getTierVariant = (tier: number) => {
+    if (tier >= 1 && tier <= 5) {
+      return `tier-${tier}` as any;
     }
+    return "default";
   };
+  
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
