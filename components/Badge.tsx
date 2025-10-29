@@ -25,11 +25,11 @@ const Badge = ({ className, variant = "default", size = "md", children, ...props
   // 티어별 로고 경로
   const getTierLogo = (variant: string) => {
     const tierLogos = {
-      "tier-1": "/Images/tier/tier1.svg",
-      "tier-2": "/Images/tier/tier2.svg",
-      "tier-3": "/Images/tier/tier3.svg",
-      "tier-4": "/Images/tier/tier4.svg",
-      "tier-5": "/Images/tier/tier5.svg",
+      "tier-1": "/images/tier/tier1.svg",
+      "tier-2": "/images/tier/tier2.svg",
+      "tier-3": "/images/tier/tier3.svg",
+      "tier-4": "/images/tier/tier4.svg",
+      "tier-5": "/images/tier/tier5.svg",
     };
     return tierLogos[variant as keyof typeof tierLogos] || null;
   };
